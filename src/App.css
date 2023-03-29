@@ -1,3 +1,6 @@
 body {
-  background-color: #E1E1E1;
+  /* background: linear-gradient(315deg, #1dff05 0%, #620da2 100%) */
+  /* background: linear-gradient(315deg, #1dff05 0%, #52cfd2 100%) */
+  background: linear-gradient(315deg, #365779 0%,  #2e78eb 100%)
 }
+
