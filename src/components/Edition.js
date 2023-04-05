@@ -1,27 +1,19 @@
+import { useState } from 'react';
+
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
-import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
-import Grid from '@mui/material/Grid';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
 import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
-import FormControl from '@mui/material/FormControl';
-import FormLabel from '@mui/material/FormLabel';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-import { useState } from "react";
 import Alert from '@mui/material/Alert';
-
-
-import { Link } from 'react-router-dom';
 
 const Project = ({ project, onChange }) => {
 	return (
@@ -40,7 +32,9 @@ const Project = ({ project, onChange }) => {
 						defaultValue={
 							project.allocation > 0 ? project.allocation * 100 : ''
 						}
-                        onChange={(e) => onChange(project.name, parseFloat(e.target.value) / 100) }
+						onChange={(e) =>
+							onChange(project.name, parseFloat(e.target.value) / 100)
+						}
 					/>
 					<Typography>%</Typography>
 				</Stack>
@@ -51,9 +45,7 @@ const Project = ({ project, onChange }) => {
 
 const ProjectTable = ({ projects, onChange }) => {
 	return (
-		<TableContainer sx={{ maxHeight: 340
-
-         }}>
+		<TableContainer sx={{ maxHeight: 340 }}>
 			<Table stickyHeader size="small">
 				<TableHead>
 					<TableRow>
@@ -78,7 +70,7 @@ const ProjectTable = ({ projects, onChange }) => {
 	);
 };
 
-const Editor = () => {
+const Edition = ({ setStep, monthStart }) => {
 	var projects = [
 		{ name: 'Offshore CAPEX Overhead - SL-05020-02-01', allocation: 0.25 },
 		{
@@ -164,71 +156,60 @@ const Editor = () => {
 			)
 		);
 
-
 	return (
-		<Grid
-			container
-			spacing={0}
-			direction="column"
-			alignItems="center"
-			justifyContent="center"
-			style={{ minHeight: '100vh' }}
-		>
-			<Grid item xs={3}>
-				<Box
-					sx={{
-						width: 800,
-						borderRadius: 6,
-						backgroundColor: 'white',
-						p: 6,
-						m: 4,
-					}}
+		<Stack spacing={4} alignItems="center" width={720}>
+			<Typography variant="h4" align="center">
+				Bitte erfasse Deine Zeit für{' '}
+				<b>
+					{monthStart.toLocaleString('de', { month: 'long', year: 'numeric' })}
+				</b>{' '}
+				📝
+			</Typography>
+			<Stack spacing={0} alignItems="center">
+				<RadioGroup
+					row
+					defaultValue="percent"
+					aria-labelledby="demo-row-radio-buttons-group-label"
+					name="row-radio-buttons-group"
 				>
-					<Stack spacing={4} alignItems="center">
-						{/* <DesignServicesIcon style={{ fontSize: '80px' }} /> */}
-						<Typography variant="h4" align="center">
-							Bitte erfasse Deine Zeit für März 📝
-						</Typography>
-						<Stack spacing={0} alignItems="center">
-							<RadioGroup
-								row
-								defaultValue="percent"
-								aria-labelledby="demo-row-radio-buttons-group-label"
-								name="row-radio-buttons-group"
-							>
-								<FormControlLabel
-									value="percent"
-									control={<Radio />}
-									label="Prozente"
-								/>
-								<FormControlLabel
-									value="hours"
-									control={<Radio />}
-									label="Stunden pro Woche"
-								/>
-							</RadioGroup>
-							<Typography variant="body">
-								ℹ️ Eingabe ohne Berücksichtigung der Urlaubstagen usw.
-							</Typography>
-						</Stack>
-						<ProjectTable projects={projects} onChange={updateAlloc}/>
-    
-                        <Alert severity="warning" ><b>Not allocated:</b> {100 - Math.round(alloc.map(x => x.allocation).reduce(function(total, x) {return x + total})*100)} %</Alert>
-						<Link to="/completed" style={{ textDecoration: 'none' }}>
-							<Button
-								variant="contained"
-								size="large"
-								disableElevation
-								style={{ textTransform: 'none' }}
-							>
-								In CATS eintragen
-							</Button>
-						</Link>
-					</Stack>
-				</Box>
-			</Grid>
-		</Grid>
+					<FormControlLabel
+						value="percent"
+						control={<Radio />}
+						label="Prozente"
+					/>
+					<FormControlLabel
+						value="hours"
+						control={<Radio />}
+						label="Stunden pro Woche"
+					/>
+				</RadioGroup>
+				<Typography variant="body">
+					ℹ️ Eingabe ohne Berücksichtigung der Urlaubstagen usw.
+				</Typography>
+			</Stack>
+			<ProjectTable projects={projects} onChange={updateAlloc} />
+			<Alert severity="warning">
+				<b>Not allocated:</b>{' '}
+				{100 -
+					Math.round(
+						alloc
+							.map((x) => x.allocation)
+							.reduce(function (total, x) {
+								return x + total;
+							}) * 100
+					)}{' '}
+				%
+			</Alert>
+			<Button
+				variant="contained"
+				size="large"
+				disableElevation
+				style={{ textTransform: 'none' }}
+			>
+				In CATS eintragen
+			</Button>
+		</Stack>
 	);
 };
 
-export default Editor;
+export default Edition;
