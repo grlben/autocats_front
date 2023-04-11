@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
@@ -14,43 +14,80 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Alert from '@mui/material/Alert';
+import { InputAdornment } from '@mui/material';
 
-const Project = ({ project, onChange }) => {
+import Frame from './Frame';
+import Loading from './Loading';
+
+import allocationService from '../services/allocation';
+import { VerticalAlignCenter } from '@mui/icons-material';
+
+const Project = ({ projectPreviousMonth, project, onChange, unit }) => {
+	const unitVol = unit === 'percent' ? 100 : 37;
+	const unitText = unit === 'percent' ? '%' : 'Std.';
 	return (
 		<TableRow>
 			<TableCell>{project.name}</TableCell>
 			<TableCell>
-				{project.allocation > 0 ? project.allocation * 100 + ' %' : '-'}
+				{projectPreviousMonth.allocation > 0
+					? Math.round(projectPreviousMonth.allocation * unitVol) +
+					  ' ' +
+					  unitText
+					: '-'}
 			</TableCell>
 			<TableCell>
 				<Stack m={0} spacing={1} direction="row" alignItems="center">
 					<TextField
 						id="outlined-number"
-						type="number"
 						size="small"
-						style={{ width: 80 }}
-						defaultValue={
-							project.allocation > 0 ? project.allocation * 100 : ''
+						autoComplete="off"
+						InputProps={{
+							endAdornment: (
+								<InputAdornment position="end">{unitText}</InputAdornment>
+							)
+						}}
+						onFocus={(event) => {
+							event.target.select();
+						}}
+						style={{ width: 85 }}
+						value={
+							project.allocation > 0
+								? Math.round(project.allocation * unitVol)
+								: ''
 						}
-						onChange={(e) =>
-							onChange(project.name, parseFloat(e.target.value) / 100)
-						}
+						onChange={(e) => onChange(project.name, e.target.value)}
 					/>
-					<Typography>%</Typography>
 				</Stack>
 			</TableCell>
 		</TableRow>
 	);
 };
 
-const ProjectTable = ({ projects, onChange }) => {
+const ProjectTable = ({
+	allocPreviousMonth,
+	alloc,
+	onChange,
+	setSearchName,
+	unit,
+}) => {
 	return (
-		<TableContainer sx={{ maxHeight: 340 }}>
+		<TableContainer sx={{ height: 340 }}>
 			<Table stickyHeader size="small">
 				<TableHead>
 					<TableRow>
-						<TableCell>
-							<b>Projekt</b>
+						<TableCell style={{ verticalAlign: 'center' }} width={460}>
+							<Stack direction={'row'} alignItems="center" spacing={1}>
+								<b>Projekt</b>
+								<TextField
+									id="searchName"
+									label="Suchen"
+									autoComplete="off"
+									onChange={(e) => {
+										setSearchName(e.target.value);
+									}}
+									size="small"
+								/>
+							</Stack>
 						</TableCell>
 						<TableCell>
 							<b>Februar</b>
@@ -61,8 +98,16 @@ const ProjectTable = ({ projects, onChange }) => {
 					</TableRow>
 				</TableHead>
 				<TableBody>
-					{projects?.map((x) => (
-						<Project key={x.name} project={x} onChange={onChange} />
+					{alloc?.map((x) => (
+						<Project
+							key={x.name}
+							projectPreviousMonth={
+								allocPreviousMonth.filter((p) => p.name === x.name)[0]
+							}
+							project={x}
+							onChange={onChange}
+							unit={unit}
+						/>
 					))}
 				</TableBody>
 			</Table>
@@ -70,145 +115,149 @@ const ProjectTable = ({ projects, onChange }) => {
 	);
 };
 
-const Edition = ({ setStep, monthStart }) => {
-	var projects = [
-		{ name: 'Offshore CAPEX Overhead - SL-05020-02-01', allocation: 0.25 },
-		{
-			name: 'IN.20WDBAC01.02 \u00fcbergr. Lstg. - 52A000015735/0010',
-			allocation: 0.25,
-		},
-		{
-			name: 'Onshore CAPEX Infra-Projekte (Overhead) - SL-05020-01-01',
-			allocation: 0.15,
-		},
-		{
-			name: 'IN.19WDBAC03.02 \u00fcbergr. Lstg. - 52A000015705/0010',
-			allocation: 0.05,
-		},
-		{
-			name: 'IN.17WDBAC01.04 CWA 2 OSS Baltic Eagle - 52A000015663/0010',
-			allocation: 0.0,
-		},
-		{ name: 'IN.20WDBAC01.05 OSS 2 - 52A000015738/0010', allocation: 0.0 },
-		{ name: 'Strompreisbremse Personal - SL-05020-08-01', allocation: 0.0 },
-		{
-			name: 'WGR_HZT_01 - Permanent Services - SL-05020-07-01',
-			allocation: 0.0,
-		},
-		{ name: 'KWK Personal - SL-05020-04-01', allocation: 0.0 },
-		{ name: 'EEG Personal - SL-05020-03-01', allocation: 0.0 },
-		{ name: 'Offshore OPEX Overhead - SL-05020-02-02', allocation: 0.0 },
-		{
-			name: 'IN.17WDBAC01.03 CWA 2 Kabel - 52A000015662/0010',
-			allocation: 0.0,
-		},
-		{
-			name: 'IN.22WCNDC02.02 NOR-11-1 \u00fcbergr. Lstg. - 52A000015839/0010',
-			allocation: 0.0,
-		},
-		{ name: 'IN.20WDBAC01.21 Leitung - 52A000015740/0010', allocation: 0.0 },
-		{ name: 'IN.20WDBAC01.11 UW Sanitz - 52A000015739/0010', allocation: 0.0 },
-		{ name: 'IN.20WDBAC01.04 OSS 1 - 52A000015737/0010', allocation: 0.0 },
-		{
-			name: 'IN.17WDBAC01.05 CWA 2 OSS Arcadis Ost 1 - 52A000015664/0010',
-			allocation: 0.0,
-		},
-		{ name: 'IN.20WDBAC01.03 Kabel - 52A000015736/0010', allocation: 0.0 },
-		{
-			name: 'IN.17WDBAC01.02 CWA 2 \u00fcbergr. Lstg. - 52A000015661/0010',
-			allocation: 0.0,
-		},
-		{
-			name: 'IN.20WDBAC01.01 Genehmigung/Kompensation - 52A000015734/0010',
-			allocation: 0.0,
-		},
-		{
-			name: 'IN.19WDBAC03.21 Leitung (Einschleifung) - 52A000015709/0010',
-			allocation: 0.0,
-		},
-		{ name: 'IN.19WDBAC03.11 UW Stilow - 52A000015708/0010', allocation: 0.0 },
-		{ name: 'IN.19WDBAC03.04 OSS - 52A000015707/0010', allocation: 0.0 },
-		{ name: 'IN.19WDBAC03.03 Kabel - 52A000015706/0010', allocation: 0.0 },
-		{
-			name: 'IN.19WDBAC03.01 Gen./Kompensation - 52A000015704/0010',
-			allocation: 0.0,
-		},
-		{
-			name: 'IN.17WDBAC01.21 CWA 2 Leitungseinschlfg. - 52A000015666/0010',
-			allocation: 0.0,
-		},
-		{
-			name: 'IN.17WDBAC01.11 CWA 2 UW Lubmin - 52A000015665/0010',
-			allocation: 0.0,
-		},
-		{
-			name: 'IN.17WDBAC01.01 CWA 2 Gen./Kompensation - 52A000015660/0010',
-			allocation: 0.0,
-		},
-	];
+const Edition = ({ setStep, monthStart, token }) => {
 
-	const [alloc, setAlloc] = useState(projects);
+	const submit = () => {
+		console.log('Submitted');
+		setStep('success');
+	};
 
-	var updateAlloc = (id, newAllocation) =>
-		setAlloc(
-			alloc.map((p) =>
-				p.name === id ? { name: id, allocation: newAllocation } : p
-			)
+	const [alloc, setAlloc] = useState([]);
+	const [searchName, setSearchName] = useState('');
+	const [unit, setUnit] = useState('percent');
+	const limit = unit === 'percent' ? 100 : 37;
+	const unitText = unit === 'percent' ? '%' : 'Std.';
+
+	const allocToShow =
+		searchName === ''
+			? alloc
+			: alloc.filter((p) =>
+					p.name.toLowerCase().includes(searchName.toLowerCase())
+			  );
+
+	var updateAlloc = (id, newAllocation) => {
+		const regex = /^[0-9\b]+$/;
+
+		if (newAllocation > limit) return;
+
+		if (newAllocation === '' || regex.test(newAllocation)) {
+			setAlloc(
+				alloc.map((p) =>
+					p.name === id
+						? {
+								name: id,
+								allocation:
+									newAllocation === '' ? 0 : parseFloat(newAllocation) / limit,
+						  }
+						: p
+				)
+			);
+		}
+	};
+
+	const [allocPreviousMonth, setAllocPreviousMonth] = useState([]);
+
+	useEffect(() => {
+		console.log('loading previous month');
+		const temp = allocationService.getAllocation(token, monthStart);
+		console.log('previous month loaded');
+		setAllocPreviousMonth(temp);
+		setAlloc(temp);
+	}, []);
+
+	const checkAlloc = () => {
+		const totalAlloc = Math.round(
+			alloc.length > 0
+				? alloc
+						.map((x) => x.allocation)
+						.reduce(function (total, x) {
+							return x + total;
+						}) * limit
+				: 0
 		);
 
-	return (
-		<Stack spacing={4} alignItems="center" width={720}>
-			<Typography variant="h4" align="center">
-				Bitte erfasse Deine Zeit für{' '}
-				<b>
-					{monthStart.toLocaleString('de', { month: 'long', year: 'numeric' })}
-				</b>{' '}
-				📝
-			</Typography>
-			<Stack spacing={0} alignItems="center">
-				<RadioGroup
-					row
-					defaultValue="percent"
-					aria-labelledby="demo-row-radio-buttons-group-label"
-					name="row-radio-buttons-group"
-				>
-					<FormControlLabel
-						value="percent"
-						control={<Radio />}
-						label="Prozente"
-					/>
-					<FormControlLabel
-						value="hours"
-						control={<Radio />}
-						label="Stunden pro Woche"
-					/>
-				</RadioGroup>
-				<Typography variant="body">
-					ℹ️ Eingabe ohne Berücksichtigung der Urlaubstagen usw.
-				</Typography>
-			</Stack>
-			<ProjectTable projects={projects} onChange={updateAlloc} />
+		if (totalAlloc > limit) {
+			return (
+				<Alert severity="error">
+					Es wurde zu viel allokiert: {totalAlloc - limit} {unitText}
+				</Alert>
+			);
+		}
+
+		if (totalAlloc === limit) {
+			return (
+				<Alert severity="info">
+					Deine Arbeitszeit wurde vollständig allokiert 👍
+				</Alert>
+			);
+		}
+
+		return (
 			<Alert severity="warning">
-				<b>Not allocated:</b>{' '}
-				{100 -
-					Math.round(
-						alloc
-							.map((x) => x.allocation)
-							.reduce(function (total, x) {
-								return x + total;
-							}) * 100
-					)}{' '}
-				%
+				Ein Teil deiner Zeit wurde nicht allokiert: {limit - totalAlloc}{' '}
+				{unitText}
 			</Alert>
-			<Button
-				variant="contained"
-				size="large"
-				disableElevation
-				style={{ textTransform: 'none' }}
-			>
-				In CATS eintragen
-			</Button>
-		</Stack>
+		);
+	};
+
+	return alloc.length === 0 ? (
+		<Loading />
+	) : (
+		<Frame>
+			<Stack spacing={4} alignItems="center" width={720}>
+				<Typography variant="h4" align="center">
+					Bitte erfasse Deine Zeit für{' '}
+					<b>
+						{monthStart.toLocaleString('de', {
+							month: 'long',
+							year: 'numeric',
+						})}
+					</b>{' '}
+					📝
+				</Typography>
+				<Stack spacing={0} alignItems="center">
+					<RadioGroup
+						row
+						defaultValue="percent"
+						aria-labelledby="demo-row-radio-buttons-group-label"
+						name="row-radio-buttons-group"
+						onChange={(e) => setUnit(e.target.value)}
+					>
+						<FormControlLabel
+							value="percent"
+							control={<Radio />}
+							label="Prozente"
+						/>
+						<FormControlLabel
+							value="hours"
+							control={<Radio />}
+							label="Stunden pro Woche"
+						/>
+					</RadioGroup>
+					<Typography variant="body">
+						ℹ️ Eingabe ohne Berücksichtigung der Urlaubstagen usw.
+					</Typography>
+				</Stack>
+
+				<ProjectTable
+					allocPreviousMonth={allocPreviousMonth}
+					alloc={allocToShow}
+					onChange={updateAlloc}
+					setSearchName={setSearchName}
+					unit={unit}
+				/>
+				{checkAlloc()}
+				<Button
+					variant="contained"
+					size="large"
+					disableElevation
+					style={{ textTransform: 'none' }}
+					onClick={submit}
+				>
+					In CATS eintragen
+				</Button>
+			</Stack>
+		</Frame>
 	);
 };
 

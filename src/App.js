@@ -1,6 +1,7 @@
 import './App.css';
 
 import { useState } from 'react';
+// import { TransitionGroup } from 'react-transition-group';
 
 import Login from './components/Login';
 import ModeSelection from './components/ModeSelection';
@@ -10,23 +11,6 @@ import Success from './components/Success';
 
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
-
-const currentScreen = (step, setStep, monthStart) => {
-	switch (step) {
-		case 'login':
-			return <Login setStep={setStep} />;
-		case 'mode_selection':
-			return <ModeSelection setStep={setStep} monthStart={monthStart} />;
-		case 'loading':
-			return <Loading />;
-		case 'edition':
-			return <Edition setStep={setStep} monthStart={monthStart}/>;
-		case 'success':
-			return <Success />;
-		default:
-		// do nothing
-	}
-};
 
 const getMonthStart = () => {
 	const date = new Date();
@@ -38,12 +22,31 @@ const getMonthStart = () => {
 };
 
 const toISO = (date) => date.toISOString().split('T')[0];
-	
 
 function App() {
 	const [step, setStep] = useState('login');
-	  
+	const [token, setToken] = useState({});
+
 	const monthStart = getMonthStart();
+
+	const currentScreen = () => {
+		switch (step) {
+			case 'login':
+				return <Login setStep={setStep} setToken={setToken} />;
+			case 'mode_selection':
+				return <ModeSelection setStep={setStep} monthStart={monthStart} />;
+			case 'edition':
+				return (
+					<Edition setStep={setStep} monthStart={monthStart} token={token} />
+				);
+			case 'success':
+				return <Success />;
+			default:
+			// do nothing
+		}
+	};
+
+	console.log('Current token:' + token.value);
 
 	return (
 		<Grid
@@ -55,17 +58,9 @@ function App() {
 			style={{ minHeight: '100vh' }}
 		>
 			<Grid item xs={3}>
-				<Box
-					sx={{
-						// width: 800,
-						borderRadius: 6,
-						backgroundColor: 'white',
-						p: 6,
-						m: 4,
-					}}
-				>
+				{/* <TransitionGroup> */}
 					{currentScreen(step, setStep, monthStart)}
-				</Box>
+				{/* </TransitionGroup> */}
 			</Grid>
 		</Grid>
 	);
