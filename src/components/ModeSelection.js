@@ -4,14 +4,22 @@ import Typography from '@mui/material/Typography';
 
 import Frame from './Frame';
 
-const ModeSelection = ({ setStep, monthStart }) => {
+import allocationService from '../services/allocation';
+
+const toISO = (date) => date.toISOString().split('T')[0];
+
+const ModeSelection = ({ setStep, monthStart, token }) => {
 	const copyPreviousMonth = () => {
-		console.log('Copy previous month');
+		console.log('Copy previous month selected');
+		allocationService
+			.copyPreviousMonth(token, toISO(monthStart))
+			.then((r) => console.log('Data copied successfully'))
+			.catch((e) => console.log('Request error:', e.toJSON()));
 		setStep('success');
 	};
 
 	const edit = () => {
-		console.log('edition');
+		console.log('Edition selected');
 		setStep('edition');
 	};
 

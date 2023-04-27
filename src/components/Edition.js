@@ -20,7 +20,8 @@ import Frame from './Frame';
 import Loading from './Loading';
 
 import allocationService from '../services/allocation';
-import { VerticalAlignCenter } from '@mui/icons-material';
+
+const toISO = (date) => date.toISOString().split('T')[0];
 
 const Project = ({ projectPreviousMonth, project, onChange, unit }) => {
 	const unitVol = unit === 'percent' ? 100 : 37;
@@ -44,7 +45,7 @@ const Project = ({ projectPreviousMonth, project, onChange, unit }) => {
 						InputProps={{
 							endAdornment: (
 								<InputAdornment position="end">{unitText}</InputAdornment>
-							)
+							),
 						}}
 						onFocus={(event) => {
 							event.target.select();
@@ -69,6 +70,8 @@ const ProjectTable = ({
 	onChange,
 	setSearchName,
 	unit,
+	monthStart,
+	previousMonthStart,
 }) => {
 	return (
 		<TableContainer sx={{ height: 340 }}>
@@ -90,10 +93,18 @@ const ProjectTable = ({
 							</Stack>
 						</TableCell>
 						<TableCell>
-							<b>Februar</b>
+							<b>
+								{previousMonthStart.toLocaleString('de', {
+									month: 'long',
+								})}
+							</b>
 						</TableCell>
 						<TableCell>
-							<b>März</b>
+							<b>
+								{monthStart.toLocaleString('de', {
+									month: 'long',
+								})}
+							</b>
 						</TableCell>
 					</TableRow>
 				</TableHead>
@@ -116,15 +127,26 @@ const ProjectTable = ({
 };
 
 const Edition = ({ setStep, monthStart, token }) => {
-
 	const submit = () => {
-		console.log('Submitted');
+		console.log('Submit');
+		allocationService
+			.postAllocation(token, toISO(monthStart), alloc)
+			.then((r) => console.log('Data sent successfully'))
+			.catch((e) => console.log('Request error:', e.toJSON()));
 		setStep('success');
 	};
 
+	const previousMonthStart = new Date(monthStart);
+	previousMonthStart.setMonth(monthStart.getMonth() - 1);
+
 	const [alloc, setAlloc] = useState([]);
+	let validAlloc = false;
+
+	const [allocPreviousMonth, setAllocPreviousMonth] = useState([]);
+
 	const [searchName, setSearchName] = useState('');
 	const [unit, setUnit] = useState('percent');
+
 	const limit = unit === 'percent' ? 100 : 37;
 	const unitText = unit === 'percent' ? '%' : 'Std.';
 
@@ -135,7 +157,7 @@ const Edition = ({ setStep, monthStart, token }) => {
 					p.name.toLowerCase().includes(searchName.toLowerCase())
 			  );
 
-	var updateAlloc = (id, newAllocation) => {
+	const updateAlloc = (id, newAllocation) => {
 		const regex = /^[0-9\b]+$/;
 
 		if (newAllocation > limit) return;
@@ -155,14 +177,16 @@ const Edition = ({ setStep, monthStart, token }) => {
 		}
 	};
 
-	const [allocPreviousMonth, setAllocPreviousMonth] = useState([]);
-
 	useEffect(() => {
-		console.log('loading previous month');
-		const temp = allocationService.getAllocation(token, monthStart);
-		console.log('previous month loaded');
-		setAllocPreviousMonth(temp);
-		setAlloc(temp);
+		console.log('Loading previous month');
+		allocationService
+			.getAllocation(token, toISO(previousMonthStart))
+			.then((initialAlloc) => {
+				console.log('Previous month loaded');
+				setAllocPreviousMonth(initialAlloc);
+				setAlloc(initialAlloc);
+			})
+			.catch((e) => console.log('Request error:', e.toJSON()));
 	}, []);
 
 	const checkAlloc = () => {
@@ -177,6 +201,7 @@ const Edition = ({ setStep, monthStart, token }) => {
 		);
 
 		if (totalAlloc > limit) {
+			validAlloc = false;
 			return (
 				<Alert severity="error">
 					Es wurde zu viel allokiert: {totalAlloc - limit} {unitText}
@@ -185,6 +210,7 @@ const Edition = ({ setStep, monthStart, token }) => {
 		}
 
 		if (totalAlloc === limit) {
+			validAlloc = true;
 			return (
 				<Alert severity="info">
 					Deine Arbeitszeit wurde vollständig allokiert 👍
@@ -192,6 +218,7 @@ const Edition = ({ setStep, monthStart, token }) => {
 			);
 		}
 
+		validAlloc = true;
 		return (
 			<Alert severity="warning">
 				Ein Teil deiner Zeit wurde nicht allokiert: {limit - totalAlloc}{' '}
@@ -245,6 +272,8 @@ const Edition = ({ setStep, monthStart, token }) => {
 					onChange={updateAlloc}
 					setSearchName={setSearchName}
 					unit={unit}
+					monthStart={monthStart}
+					previousMonthStart={previousMonthStart}
 				/>
 				{checkAlloc()}
 				<Button
@@ -253,6 +282,7 @@ const Edition = ({ setStep, monthStart, token }) => {
 					disableElevation
 					style={{ textTransform: 'none' }}
 					onClick={submit}
+					disabled={!validAlloc}
 				>
 					In CATS eintragen
 				</Button>

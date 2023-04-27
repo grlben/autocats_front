@@ -16,23 +16,26 @@ const Success = () => {
 						sx={{ stroke: '#ffffff', strokeWidth: 0.4 }}
 					/>
 					<Typography variant="h4" align="center" style={{ color: 'green' }}>
-						Alles klar! Wir tragen das für Dich in CATS ein.
+						Alles klar! Wir tragen das für Dich ein.
 					</Typography>
 				</Stack>
 				<Stack>
-					<Typography variant="body" align="center">
+					{/* <Typography variant="body" align="center">
 						In ein paar Minuten, wirst Du eine <b>Bestätigungsemail</b> 📨
 						empfangen.{' '}
 					</Typography>
 					<Typography variant="body" align="center">
 						Bitte prüfe die Allokation in der Email und passe sie ggf. in CATS
 						an.
+					</Typography> */}
+					<Typography variant="body" align="center">
+						Du kannst jetzt zu CATS zurückkehren. Bitte prüfe die Allokation und passe sie ggf. an 🔍
 					</Typography>
 				</Stack>
-				<FormControlLabel
+				{/* <FormControlLabel
 					control={<Checkbox defaultChecked />}
 					label="Ich möchte eine Erinnerung nächsten Monat per Email erhalten."
-				/>
+				/> */}
 			</Stack>
 		</Frame>
 	);
