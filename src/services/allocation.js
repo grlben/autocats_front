@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const baseUrl = 'https://aap-fo-aep-test.corp.transmission-it.de/';
+// const baseUrl = 'https://aap-fo-aep-test.corp.transmission-it.de/';
+const baseUrl = 'http://127.0.0.1:8007/';
 
 const getAllocation = (token, monthStart) => {
 	console.log(

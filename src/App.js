@@ -19,7 +19,8 @@ const getMonthStart = () => {
 function App() {
 	// Browser extesion: login step skipped, the process starts directly with mode selection
 	const [step, setStep] = useState('mode_selection');
-	const token = 'TOKEN';
+	// eslint-disable-next-line no-undef
+	const token = COOKIE_KEY;
 
 	const monthStart = getMonthStart();
 
