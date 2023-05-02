@@ -18,6 +18,9 @@ const ModeSelection = ({ setStep, monthStart, token }) => {
 		setStep('success');
 	};
 
+	const previousMonthStart = new Date(monthStart);
+	previousMonthStart.setMonth(monthStart.getMonth() - 1);
+
 	const edit = () => {
 		console.log('Edition selected');
 		setStep('edition');
@@ -44,7 +47,11 @@ const ModeSelection = ({ setStep, monthStart, token }) => {
 					sx={{ fontSize: 18 }}
 					onClick={copyPreviousMonth}
 				>
-					Es hat sich seit Februar nichts geändert.
+					Es hat sich seit{' '}
+					{previousMonthStart.toLocaleString('de', {
+						month: 'long',
+					})}{' '}
+					nichts geändert.
 				</Button>
 				<Button
 					variant="outlined"

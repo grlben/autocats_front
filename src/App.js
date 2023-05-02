@@ -21,6 +21,7 @@ function App() {
 	const [step, setStep] = useState('mode_selection');
 	// eslint-disable-next-line no-undef
 	const token = COOKIE_KEY;
+	// const token = 'TOKEN';
 
 	const monthStart = getMonthStart();
 
@@ -29,7 +30,13 @@ function App() {
 			// case 'login':
 			// 	return <Login setStep={setStep} setToken={setToken} />;
 			case 'mode_selection':
-				return <ModeSelection setStep={setStep} monthStart={monthStart} token={token}/>;
+				return (
+					<ModeSelection
+						setStep={setStep}
+						monthStart={monthStart}
+						token={token}
+					/>
+				);
 			case 'edition':
 				return (
 					<Edition setStep={setStep} monthStart={monthStart} token={token} />

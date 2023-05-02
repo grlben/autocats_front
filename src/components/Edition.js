@@ -183,6 +183,7 @@ const Edition = ({ setStep, monthStart, token }) => {
 			.getAllocation(token, toISO(previousMonthStart))
 			.then((initialAlloc) => {
 				console.log('Previous month loaded');
+				console.log();
 				setAllocPreviousMonth(initialAlloc);
 				setAlloc(initialAlloc);
 			})
