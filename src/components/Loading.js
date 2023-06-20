@@ -7,12 +7,6 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Frame from './Frame';
 
 const Loading = () => {
-	useEffect(() => {
-		setTimeout(() => {
-			//   navigate('/editor')
-		}, 8000);
-	}, []);
-
 	return (
 		<Frame>
 			<Stack spacing={4} alignItems="center" width={720}>

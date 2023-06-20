@@ -20,6 +20,8 @@ function App() {
 	// Browser extesion: login step skipped, the process starts directly with mode selection
 	const [step, setStep] = useState('mode_selection');
 	// eslint-disable-next-line no-undef
+
+	// Token variable collected from browser extension
 	// const token = COOKIE_KEY;
 	const token = 'TOKEN';
 
@@ -27,6 +29,7 @@ function App() {
 
 	const currentScreen = () => {
 		switch (step) {
+			// Browser extesion: login step skipped, the process starts directly with mode selection
 			// case 'login':
 			// 	return <Login setStep={setStep} setToken={setToken} />;
 			case 'mode_selection':

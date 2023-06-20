@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
@@ -12,7 +10,6 @@ import Frame from './Frame';
 import loginService from '../services/login';
 
 const Login = ({ step, setStep, setToken }) => {
-	// const [show, setShow] = useState(true);
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
@@ -26,7 +23,6 @@ const Login = ({ step, setStep, setToken }) => {
 		);
 		setToken(token);
 		setStep('mode_selection');
-		// setShow(false);
 	};
 
 	return (
